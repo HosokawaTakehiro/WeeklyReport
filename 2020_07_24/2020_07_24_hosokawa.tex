@@ -1,0 +1,89 @@
+%\documentstyle[epsf,twocolumn]{jarticle}       %LaTeX2e仕様
+\documentclass[]{jarticle}     %pLaTeX2e仕様(platex.exeの場合)
+%\documentclass[twocolumn]{ujarticle}     %pLaTeX2e仕様(uplatex.exeの場合)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%%  基本バージョン
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setlength{\topmargin}{-45pt}
+%\setlength{\oddsidemargin}{0cm} 
+\setlength{\oddsidemargin}{-7.5mm}
+%\setlength{\evensidemargin}{0cm} 
+\setlength{\textheight}{24.1cm}
+%setlength{\textheight}{25cm} 
+\setlength{\textwidth}{17.4cm}
+%\setlength{\textwidth}{172mm} 
+\setlength{\columnsep}{11mm}
+
+\kanjiskip=.07zw plus.5pt minus.5pt
+
+
+% 【節が変わるごとに (1.1)(1.2) … (2.1)(2.2) と数式番号をつけるとき】
+%\makeatletter
+%\renewcommand{\theequation}{%
+%\thesection.\arabic{equation}} %\@addtoreset{equation}{section}
+%\makeatother
+
+%\renewcommand{\arraystretch}{0.95} 行間の設定
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[dvipdfmx]{graphicx}   %pLaTeX2e仕様(\documentstyle ->\documentclass)\documentclass[dvipdfmx]{graphicx}
+\usepackage[dvipdfmx]{color}
+\usepackage[subrefformat=parens]{subcaption}
+\usepackage{colortbl}
+\usepackage{multicol}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+
+\noindent
+
+\hspace{1em}
+\today
+\hfill
+\ \ 細川　岳大
+
+\vspace{2mm}
+
+\hrule
+
+\begin{center}
+{\Large \bf 進捗報告}
+\end{center}
+\hrule
+\vspace{3mm}
+
+
+% ここから 文章 Start!
+
+\section{今週やったこと}
+\begin{itemize}
+ \item GAのプログラムの一部変更および追加
+ \item 今週google colab側のerrorでdriveからのロードができず
+ 一部モデルの学習はしたが実験としてはほぼ回せていない(7/24，8時時点では治った模様)
+\end{itemize}
+\subsection{変更箇所}
+発表のコメントでもあった通り，testとvalidationを分けるように変更した．
+train,test,validationを4万，1万，1万に分けることようにした．
+
+\subsection{その他}
+\subsubsection{mixup}
+mixupの実装を行った．\\
+またmixupは最終層で行う方が良いらしいのでAutoencoderで特徴抽出をすればいいと思った．\\
+\\
+他のdataaugmentに関しても，特徴抽出後にすることはできないか?\\
+$\rightarrow$アフィン変換は行列で変換できる，一方色の変換はヒストグラムを用いる．\\
+\\
+特徴抽出後は実際の変換と異なるのではないか?
+
+\section{来週のタスク}
+\begin{itemize}
+	\item GAの追加検証
+	\item 絵本に対するリサーチ
+\end{itemize}
+
+\end{document}
+
+
