@@ -1,0 +1,166 @@
+%\documentstyle[epsf,twocolumn]{jarticle}       %LaTeX2e仕様
+\documentclass[twocolumn]{ujarticle}     %pLaTeX2e仕様(platex.exeの場合)
+%\documentclass[twocolumn]{ujarticle}     %pLaTeX2e仕様(uplatex.exeの場合)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%%  基本バージョン
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setlength{\topmargin}{-45pt}
+%\setlength{\oddsidemargin}{0cm} 
+\setlength{\oddsidemargin}{-7.5mm}
+%\setlength{\evensidemargin}{0cm} 
+\setlength{\textheight}{24.1cm}
+%setlength{\textheight}{25cm} 
+\setlength{\textwidth}{17.4cm}
+%\setlength{\textwidth}{172mm} 
+\setlength{\columnsep}{11mm}
+
+\kanjiskip=.07zw plus.5pt minus.5pt 
+
+
+% 【節が変わるごとに (1.1)(1.2) … (2.1)(2.2) と数式番号をつけるとき】
+%\makeatletter
+%\renewcommand{\theequation}{%
+%\thesection.\arabic{equation}} %\@addtoreset{equation}{section}
+%\makeatother
+
+%\renewcommand{\arraystretch}{0.95} 行間の設定
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[dvipdfmx]{graphicx}   %pLaTeX2e仕様(\documentstyle ->\documentclass)\documentclass[dvipdfmx]{graphicx}
+\usepackage[subrefformat=parens]{subcaption}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+
+\twocolumn[
+\noindent
+
+\hspace{1em}
+\today
+\hfill
+\ \ 細川　岳大
+
+\vspace{2mm}
+
+\hrule
+
+\begin{center}
+{\Large \bf 進捗報告}
+\end{center}
+\hrule
+\vspace{3mm}
+]
+
+% ここから 文章 Start!
+\section{今週やったこと}
+ GAを用いたDataAugmentaion
+
+\section{実験}
+探索する水増し操作として画素値操作(Sharpness，Posterize，Brightness，Autoconstrast，Equalize，Solarize，Invert)，
+変形操作(Mirror，Flip，Translate X/Y，Shear X/Y，Rotate)の15種類の操作であり，今回はそれらすべてを個別にどの程度強くかけるかということを探索する．各操作についての強さの度合いを最大最小を設定し，それを0\%から100\%まで10\%ずつ分け11段階の度合いとし，このパラメータを探索する．ただし，Autocontrast，Equalize，Invert，Mirror，Flipは変換するか否かであるためパラメータが6以上で変換を行うとした．よって探索空間は$2^5*10^{10}=3.2*10^{11}$である．
+
+表\ref{tb:param}	に分類タスクに使用したCNNの学習パラメータを示す．
+
+\begin{table}[h]
+	\centering
+	\caption{学習パラメータ\label{tb:param}}
+	\scalebox{0.9}{
+		\begin{tabular}{|c||c|} \hline
+			optimizer&Adam\\ \hline
+			learning rate&0.001\\ \hline
+			loss function&categorical\_crossentropy\\ \hline
+			batch size&128\\ \hline
+		\end{tabular}
+	}
+\end{table}
+事前学習ではepoch数300，train\_dataを各ラベル5000枚の計50000枚使用し，ＧＡで学習する際はepoch数100，train\_dataは各ラベル200枚のオリジナルとそれらすべてをDataAugmentaionしたものとを合わせ計4000枚とし，test\_dataは共に10000枚とした．
+また，学習済みモデルからの学習において前半のepochは個体の性能が悪くてもval\_accuracyが高くなるため50から100epochにおけるval\_accuracyの最大値を個体適応度の評価値とした．\\
+ＧＡについて個体数10，交叉率0.5，突然変異率0.2とし，世代数は時間が足らず8世代までとなった．
+表\ref{tb:result}に世代ごとの平均および最良の精度を示す
+\begin{table}[h]
+	\centering
+	\caption{実験結果\label{tb:result}}
+	\scalebox{0.9}{
+		\begin{tabular}{|c||c|c|} \hline
+			&最良&平均\\ \hline\hline
+			事前学習&0.8475&\\ \hline
+			初期世代&0.8581&0.8398\\ \hline
+			第1世代&0.8580&0.8457\\ \hline
+			第2世代&0.8587&0.8537\\ \hline
+			第3世代&0.8614&0.8511\\ \hline
+			第4世代&0.8576&0.8550\\ \hline
+			第5世代&0.8593&0.8550\\ \hline
+			第6世代&0.8619&0.8540\\ \hline
+			第7世代&0.8605&0.8566\\ \hline
+			第8世代&0.8597&0.8559\\ \hline
+		\end{tabular}
+	}
+\end{table}
+個体数と世代数が少ないこともあり，事前学習に比べ少ししか改善できていない．
+\section{今後の課題}
+\ 世代数や個体数を変化させてみる.
+
+\section{CNNのモデル}
+\ 使用したCNNのモデルを以下に示す．\\
+Layer\ (type)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Output\ Shape\ \ \ \ \ \ \ \ \ \ \ \ \ param\ \#
+=================================================================
+\underline{input\_1\ (InputLayer)\ \ \ \ \ \ \ \ \ (None,\ 32,\ 32,\ 3)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0\ \ \ \ \ \ \ \ \ \ }
+\\  
+\underline{conv2d\_1\ (Conv2D)\ \ \ \ \ \ \ \ \ \ \ \ (None,\ 32,\ 32,\ 64)\ \ \ \ \ \ \ \ \ \ \ 1792\ \ \ \ \ \ \ }      
+\\  
+\underline{batch\_normalization\_1\ (Batch\ (None,\ 32,\ 32,\ 64)\ \ \ \ \ \ \ \ 256\ \ \ \ \ \ \ \ \ }
+\\  
+\underline{conv2d\_2\ (Conv2D)\ \ \ \ \ \ \ \ \ \ \ \ (None,\ 32,\ 32,\ 64)\ \ \ \ \ \ \ \ \ \ 36928\ \ \ \ \ \ \ }
+\\  
+\underline{batch\_normalization\_2\ (Batch\ (None,\ 32,\ 32,\ 64)\ \ \ \ \ \ \ \ 256\ \ \ \ \ \ \ \ \ }
+\\  
+\underline{max\_pooling2d\_1\ (MaxPooling2\ (None,\ 16,\ 16,\ 64)\ \ \ \ \ \ \ 0\ \ \ \ \ \ \ \ \ \ \ }
+\\  
+\underline{dropout\_1\ (Dropout)\ \ \ \ \ \ \ \ \ \ (None,\ 16,\ 16,\ 64)\ \ \ \ \ \ \ \ \ \ \ \ 0\ \ \ \ \ \ \ \ \ \ }
+\\  
+\underline{conv2d\_3\ (Conv2D)\ \ \ \ \ \ \ \ \ \ \ \ (None,\ 16,\ 16,\ 128)\ \ \ \ \ \ \ \ \ 73856\ \ \ \ \ \ }
+\\  
+\underline{batch\_normalization\_3\ (Batch\ (None,\ 16,\ 16,\ 128)\ \ \ \ \ \ \ 512\ \ \ \ \ \ \ \ \ \ }
+\\  
+\underline{conv2d\_4\ (Conv2D)\ \ \ \ \ \ \ \ \ \ \ \ (None,\ 16,\ 16,\ 128)\ \ \ \ \ \ \ \ 147584\ \ \ \ \ \ }
+\\  
+\underline{batch\_normalization\_4\ (Batch\ (None,\ 16,\ 16,\ 128)\ \ \ \ \ \ \ 512\ \ \ \ \ \ \ \ \ }
+\\  
+\underline{max\_pooling2d\_2\ (MaxPooling2\ (None,\ 8,\ 8,\ 128)\ \ \ \ \ \ \ \ \ 0\ \ \ \ \ \ \ \ \ \ \ }
+\\  
+\underline{dropout\_2\ (Dropout)\ \ \ \ \ \ \ \ \ \ (None,\ 8,\ 8,\ 128)\ \ \ \ \ \ \ \ \ \ \ \ \ \ 0\ \ \ \ \ \ \ \ \ \ }
+\\  
+\underline{conv2d\_5\ (Conv2D)\ \ \ \ \ \ \ \ \ \ \ \ (None,\ 8,\ 8,\ 216)\ \ \ \ \ \ \ \ \ 249048\ \ \ \ \ \ \ }
+\\  
+\underline{batch\_normalization\_5\ (Batch\ (None,\ 8,\ 8,\ 216)\ \ \ \ \ \ \ \ \ 864\ \ \ \ \ \ \ \ \ \ \ }
+\\  
+\underline{conv2d\_6\ (Conv2D)\ \ \ \ \ \ \ \ \ \ \ \ (None,\ 8,\ 8,\ 216)\ \ \ \ \ \ \ \ \ \ 420120\ \ \ \ \ \ }
+\\  
+\underline{batch\_normalization\_6\ (Batch\ (None,\ 8,\ 8,\ 216)\ \ \ \ \ \ \ \ \ \ 864\ \ \ \ \ \ \ \ }
+\\  
+\underline{max\_pooling2d\_3\ (MaxPooling2\ (None,\ 4,\ 4,\ 216)\ \ \ \ \ \ \ \ \ 0\ \ \ \ \ \ \ \ \ \ \ }
+\\  
+\underline{dropout\_3\ (Dropout)\ \ \ \ \ \ \ \ \ \ (None,\ 4,\ 4,\ 216)\ \ \ \ \ \ \ \ \ \ \  \ \ \ 0\ \ \ \ \ \ \ \ \ \ }
+\\  
+\underline{conv2d\_7\ (Conv2D)\ \ \ \ \ \ \ \ \ \ \ \ (None,\ 4,\ 4,\ 512)\ \ \ \ \ \ \ \ \ 995840\ \ \ \ \ }
+\\  
+\underline{batch\_normalization\_7\ (Batch\ (None,\ 4,\ 4,\ 512)\ \ \ \ \ \ \ \ \ 2048\ \ \ \ \ \ }
+\\  
+\underline{conv2d\_8\ (Conv2D)\ \ \ \ \ \ \ \ \ \ \ \ (None,\ 4,\ 4,\ 512)\ \ \ \ \ \ \ \ \ 2359808\ \ \ }
+\\  
+\underline{batch\_normalization\_8\ (Batch\ (None,\ 4,\ 4,\ 512)\ \ \ \ \ \ \ \ \ 2048\ \ \ \ \ \ }
+\\  
+\underline{dropout\_4\ (Dropout)\ \ \ \ \ \ \ \ \ \ (None,\ 4,\ 4,\ 512)\ \ \ \ \ \ \ \ \ \ \ \ \ 0\ \ \ \ \ \ \ \ \ }
+\\  
+\underline{flatten\_1\ (Flatten)\ \ \ \ \ \ \ \ \ \ (None,\ 8192)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0\ \ \ \ \ \ \ \ \ \ }
+\\  
+\underline{dense\_1\ (Dense)\ \ \ \ \ \ \ \ \ \ \ \ \ \ (None,\ 1024)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 8389632 \ \ \ }
+\\  
+\underline{dense\_2\ (Dense)\ \ \ \ \ \ \ \ \ \ \ \ \ \ (None,\ 10)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 10250\ \ \ \ \ \ \ }
+
+\end{document}
+
+
